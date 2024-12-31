@@ -46,13 +46,6 @@ if [ "$assignment" != 'assignment1' ]; then
     fi
 fi
 
-# Clean previous build artifacts and compile the writer application natively
-echo "Cleaning previous build artifacts"
-make clean
-
-echo "Compiling writer application"
-make
-
 # Loop to write files using the compiled writer application instead of the shell script
 for i in $(seq 1 $NUMFILES)
 do

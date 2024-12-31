@@ -1,4 +1,7 @@
 #include "systemcalls.h"
+#include <unistd.h>    // for fork(), execv()
+#include <sys/wait.h>  // for waitpid()
+#include <stdlib.h>  // For system()
 
 /**
  * @param cmd the command to execute with system()
@@ -10,14 +13,16 @@
 bool do_system(const char *cmd)
 {
 
-/*
- * TODO  add your code here
- *  Call the system() function with the command set in the cmd
- *   and return a boolean true if the system() call completed with success
- *   or false() if it returned a failure
-*/
+// Call system() to execute the command and check the return value
+    int result = system(cmd);
 
-    return true;
+    // If system() returns 0, the command executed successfully
+    if (result == 0) {
+        return true;
+    }
+
+    // Otherwise, the command failed
+    return false;
 }
 
 /**
@@ -47,7 +52,7 @@ bool do_exec(int count, ...)
     command[count] = NULL;
     // this line is to avoid a compile warning before your implementation is complete
     // and may be removed
-    command[count] = command[count];
+    // command[count] = command[count];
 
 /*
  * TODO:
@@ -61,7 +66,44 @@ bool do_exec(int count, ...)
 
     va_end(args);
 
-    return true;
+    // Check if the command path is absolute
+    if (command[0][0] != '/') {
+        // If the command doesn't start with '/', return false
+        return false;
+    }
+
+
+    pid_t pid = fork();  // Create a new child process
+
+    if (pid == -1) {
+        // If fork() fails
+        return false;
+    } else if (pid == 0) {
+        // In child process
+        // Execute the command with execv()
+        if (execv(command[0], command) == -1) {
+            // execv() failed
+            return false;
+        }
+    } else {
+        // In parent process
+        int status;
+        // Wait for the child process to complete
+        if (waitpid(pid, &status, 0) == -1) {
+            // waitpid() failed
+            return false;
+        }
+
+        // Check the child process exit status
+        if (WIFEXITED(status)) {
+            // If child process exited normally, check the exit status
+            return WEXITSTATUS(status) == 0;
+        } else {
+            // If the child process terminated abnormally
+            return false;
+        }
+    }
+    return false;
 }
 
 /**
@@ -82,9 +124,9 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     command[count] = NULL;
     // this line is to avoid a compile warning before your implementation is complete
     // and may be removed
-    command[count] = command[count];
+    // command[count] = command[count];
 
-
+    
 /*
  * TODO
  *   Call execv, but first using https://stackoverflow.com/a/13784315/1446624 as a refernce,
@@ -95,5 +137,48 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
 
     va_end(args);
 
-    return true;
+    // Check if the command path is absolute
+    if (command[0][0] != '/') {
+        // If the command doesn't start with '/', return false
+        return false;
+    }
+
+    pid_t pid = fork();  // Create a new child process
+
+    if (pid == -1) {
+        // If fork() fails
+        return false;
+    } else if (pid == 0) {
+        // In child process
+        // Redirect stdout to the file specified by outputfile
+        FILE *file = freopen(outputfile, "w", stdout);
+        if (file == NULL) {
+            // If freopen fails to open the file
+            return false;
+        }
+
+        // Execute the command with execv()
+        if (execv(command[0], command) == -1) {
+            // execv() failed
+            return false;
+        }
+    } else {
+        // In parent process
+        int status;
+        // Wait for the child process to complete
+        if (waitpid(pid, &status, 0) == -1) {
+            // waitpid() failed
+            return false;
+        }
+
+        // Check the child process exit status
+        if (WIFEXITED(status)) {
+            // If child process exited normally, check the exit status
+            return WEXITSTATUS(status) == 0;
+        } else {
+            // If the child process terminated abnormally
+            return false;
+        }
+    }
+    return false;
 }
