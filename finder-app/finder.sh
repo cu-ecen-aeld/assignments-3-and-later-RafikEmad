@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Check if the required arguments are passed
 if [ -z "$1" ] || [ -z "$2" ]; then
@@ -22,11 +22,11 @@ matching_lines=0
 
 # Traverse the directory and its subdirectories
 while IFS= read -r -d $'\0' file; do
-  ((file_count++))  # Increment the file count
+  file_count=$((file_count + 1))  # Increment the file count
 
   # Count the lines in each file that match the search string
   matches_in_file=$(grep -c "$searchstr" "$file")
-  ((matching_lines += matches_in_file))  # Increment the matching lines count
+  matching_lines=$((matching_lines + matches_in_file))  # Increment the matching lines count
 done < <(find "$filesdir" -type f -print0)
 
 # Print the results

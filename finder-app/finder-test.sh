@@ -53,7 +53,8 @@ do
 done
 
 # Execute the finder.sh to search for the strings
-OUTPUTSTRING=$(./finder.sh "$WRITEDIR" "$WRITESTR")  # Use /usr/bin/finder.sh
+
+OUTPUTSTRING=$(/usr/bin/finder.sh "$WRITEDIR" "$WRITESTR")  # Use /usr/bin/finder.sh
 
 # Write the output to /tmp/assignment4-result.txt
 echo ${OUTPUTSTRING} > /tmp/assignment4-result.txt
