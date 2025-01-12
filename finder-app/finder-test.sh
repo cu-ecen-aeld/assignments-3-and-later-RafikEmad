@@ -33,7 +33,7 @@ echo "Writing ${NUMFILES} files containing string ${WRITESTR} to ${WRITEDIR}"
 rm -rf "${WRITEDIR}"
 
 # Create WRITEDIR if needed, only for assignment 2 and beyond (assignment1 is special)
-assignment=$(cat /etc/finder-app/conf/assignment.txt)  # Update path for the assignment.txt
+assignment=`cat /etc/finder-app/conf/assignment.txt`  # Update path for the assignment.txt
 
 if [ "$assignment" != 'assignment1' ]; then
     mkdir -p "$WRITEDIR"
@@ -49,14 +49,14 @@ fi
 # Loop to write files using the compiled writer application instead of the shell script
 for i in $(seq 1 $NUMFILES)
 do
-    /usr/bin/writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"  # Use /usr/bin/writer
+    writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"  # Use /usr/bin/writer
 done
 
 # Execute the finder.sh to search for the strings
-OUTPUTSTRING=$(/usr/bin/finder.sh "$WRITEDIR" "$WRITESTR")  # Use /usr/bin/finder.sh
+OUTPUTSTRING=$(./finder.sh "$WRITEDIR" "$WRITESTR")  # Use /usr/bin/finder.sh
 
 # Write the output to /tmp/assignment4-result.txt
-echo "$OUTPUTSTRING" > /tmp/assignment4-result.txt
+echo ${OUTPUTSTRING} > /tmp/assignment4-result.txt
 
 # Clean up temporary directory
 rm -rf /tmp/aeld-data
@@ -64,7 +64,7 @@ rm -rf /tmp/aeld-data
 set +e
 
 # Check if the expected output matches
-echo "${OUTPUTSTRING}" | grep "${MATCHSTR}"
+echo ${OUTPUTSTRING} | grep "${MATCHSTR}"
 if [ $? -eq 0 ]; then
     echo "success"
     exit 0
